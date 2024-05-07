@@ -4,20 +4,17 @@ import vobject
 new_cons = 'contacts-1.vcf'
 new_lst = []
 
-old_cons = '/Users/narayansajeev/Desktop/Misc/Contacts.xlsx'
+old_cons = 'Contacts.xlsx'
 old_lst = []
 
 with open(new_cons, 'r') as file:
     # Loop through contacts in vcf file
     for contact in vobject.readComponents(file.read()):
-        full = contact.fn.value.split(' ')
-        # Retrieve first and last name
-        first = full[0].capitalize()
-        last = full[1].capitalize() if len(full) > 1 else ''
+        name = ' '.join([n.capitalize() for n in contact.fn.value.split()])
         # Retrieve phone number
         phone = contact.tel.value.replace(' ', '').replace('+1', '').replace('+', '').replace(')', '')
         phone = phone.replace('(', '').replace('-', '')
-        new_lst.append([first, last, phone])
+        new_lst.append([name, phone])
 
 # Read old contacts from excel file
 df = pd.read_excel(old_cons).fillna('')
@@ -25,9 +22,12 @@ df = pd.read_excel(old_cons).fillna('')
 for row in df.iterrows():
     val = row[1]
     # Append old contacts to list
-    old_lst.append([str(val.First), str(val.Last), str(val.Phone)])
+    old_lst.append([val.Name, str(val.Phone)])
 
-print('First\tLast\tPhone')
+print('Name\tPhone')
+
+# Sort old contacts by last name
+old_lst = sorted(old_lst, key=lambda x: x[0].split()[-1])
 
 for row in old_lst:
     print('\t'.join(row))
