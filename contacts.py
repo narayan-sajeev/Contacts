@@ -1,7 +1,7 @@
 import pandas as pd
 import vobject
 
-new_cons = 'contacts-1.vcf'
+new_cons = 'contacts.vcf'
 new_lst = []
 
 old_cons = 'Contacts.xlsx'
