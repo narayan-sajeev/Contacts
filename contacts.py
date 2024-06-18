@@ -12,11 +12,14 @@ with open(new_cons, 'r') as file:
     for contact in vobject.readComponents(file.read()):
         name = ' '.join([n.capitalize() for n in contact.fn.value.split()])
         # Retrieve phone number
-        phone = contact.tel.value.replace(' ', '').replace('+1', '').replace('+', '').replace(')', '')
-        phone = phone.replace('(', '').replace('-', '')
-        new_lst.append([name, phone])
+        try:
+            phone = contact.tel.value.replace(' ', '').replace('+1', '').replace('+', '').replace(')', '')
+            phone = phone.replace('(', '').replace('-', '')
+            new_lst.append([name, phone])
+        except:
+            pass
 
-# Read old contacts from excel file
+# Read old contacts from Excel file
 df = pd.read_excel(old_cons).fillna('')
 
 for row in df.iterrows():
