@@ -56,8 +56,7 @@ for row in xl_lst:
 for row in saved_lst:
     print('\t'.join(row))
 
-# Print horizontal line
-print('*' * 50)
+print()
 
 # Print relations list
 for row in relations:
