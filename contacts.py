@@ -35,5 +35,30 @@ for row in df.iterrows():
 # Remove old contacts from list
 saved_lst = [x for x in saved_lst if x not in xl_lst]
 
+# Define relations list
+relations = []
+
+# Remove relation from saved list
+saved_no_relation = [x[:2] for x in saved_lst]
+
+# Loop through saved list
+for row in xl_lst:
+    # If contact is in saved list
+    if row[:2] in saved_no_relation:
+        # Reformat contact
+        reformat = [row[0], row[1], '']
+        # Remove contact from saved list
+        saved_lst.remove(reformat)
+        # Append contact to relations list
+        relations.append(row)
+
+# Print saved list
 for row in saved_lst:
+    print('\t'.join(row))
+
+# Print horizontal line
+print('*' * 50)
+
+# Print relations list
+for row in relations:
     print('\t'.join(row))
