@@ -35,6 +35,11 @@ for row in df.iterrows():
 # Remove old contacts from list
 saved_lst = [x for x in saved_lst if x not in xl_lst]
 
+# If no new contacts to add
+if len(saved_lst) < 1:
+    print('No new contacts to add.')
+    exit()
+
 # Create final contacts list
 contacts = []
 
