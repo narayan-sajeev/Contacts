@@ -71,6 +71,9 @@ for contact in saved_lst:
 # Sort contacts by name
 contacts = sorted(contacts)
 
+# Print column headers
+print('Name\tPhone\tRelation')
+
 # Print saved list
 for row in contacts:
     print('\t'.join(row))
