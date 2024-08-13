@@ -43,8 +43,11 @@ if len(saved_lst) < 1:
 # Create final contacts list
 contacts = []
 
-# Remove phone & relation from saved list
+# Retrieve name only from saved list
 saved_names = [x[0] for x in saved_lst]
+
+# Retrieve phone only from saved list
+saved_phones = [x[1] for x in saved_lst]
 
 # Loop through xl list
 for row in xl_lst:
@@ -54,6 +57,17 @@ for row in xl_lst:
         for contact in saved_lst:
             # If contact is found
             if contact[0] == row[0]:
+                # Append contact to contacts
+                contacts.append(contact)
+                # Remove contact from saved list
+                saved_lst.remove(contact)
+
+    # If phone is in saved list
+    elif row[1] in saved_phones:
+        # Find contact in saved list
+        for contact in saved_lst:
+            # If contact is found
+            if contact[1] == row[1]:
                 # Append contact to contacts
                 contacts.append(contact)
                 # Remove contact from saved list
