@@ -18,8 +18,7 @@ with open(saved_cons, 'r') as file:
             pass
         # Retrieve phone number
         try:
-            phone = contact.tel.value.replace(' ', '').replace('+1', '').replace('+', '').replace(')', '')
-            phone = phone.replace('(', '').replace('-', '')
+            phone = contact.tel.value.replace(' ', '').replace(')', '').replace('(', '').replace('+', '').replace('-', '')
             saved_lst.append([name, phone, rel])
         except:
             pass
