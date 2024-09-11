@@ -19,6 +19,9 @@ with open(saved_cons, 'r') as file:
         # Retrieve phone number
         try:
             phone = contact.tel.value.replace(' ', '').replace(')', '').replace('(', '').replace('+', '').replace('-', '')
+            # Remove country code if US
+            if phone.startswith('1') and len(phone) == 11:
+                phone = phone[1:]
             saved_lst.append([name, phone, rel])
         except:
             pass
