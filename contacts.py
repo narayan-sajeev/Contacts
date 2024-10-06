@@ -19,7 +19,8 @@ def parse_vcf(file_path):
             [
                 ' '.join(word.capitalize() for word in contact.fn.value.split()),
                 clean_phone_number(contact.tel.value),
-                getattr(contact, 'ORG', [''])[0]
+                contact.org.value[0] if hasattr(contact, 'org') else ''
+
             ]
             for contact in vobject.readComponents(file.read())
             if all(hasattr(contact, attr) for attr in ['fn', 'tel'])
@@ -46,7 +47,7 @@ def main():
     contacts = []
 
     # Map saved contacts by name
-    saved_dict = {contact[0]: contact for contact in saved_lst}
+    saved_names = {contact[0]: contact for contact in saved_lst}
 
     # Map saved contacts by phone
     saved_phones = {contact[1]: contact for contact in saved_lst}
@@ -56,15 +57,15 @@ def main():
         # Convert phone number to string
         row = [str(cell) for cell in _]
 
-        if row[0] in saved_dict:
-            contacts.append(saved_dict.pop(row[0]))
+        if row[0] in saved_names:
+            contacts.append(saved_names.pop(row[0]))
         elif row[1] in saved_phones:
             contacts.append(saved_phones.pop(row[1]))
         else:
             contacts.append(row)
 
     # Add remaining saved contacts
-    contacts.extend(saved_dict.values())
+    contacts.extend(saved_names.values())
 
     # Separate and sort contacts
     contacts = sorted(contacts, key=lambda c: (len(c[1]) == 10, c[0]))
