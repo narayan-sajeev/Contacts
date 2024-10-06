@@ -40,10 +40,6 @@ def main():
     # Remove old contacts from the saved list
     saved_lst = [contact for contact in saved_lst if contact not in xl_lst]
 
-    if not saved_lst:
-        print('No new contacts to add.')
-        return
-
     contacts = []
 
     # Map saved contacts by name
@@ -63,6 +59,10 @@ def main():
             contacts.append(saved_phones.pop(row[1]))
         else:
             contacts.append(row)
+
+    if not saved_names:
+        print('No new contacts to add.')
+        return
 
     # Add remaining saved contacts
     contacts.extend(saved_names.values())
