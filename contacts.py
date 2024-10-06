@@ -19,60 +19,17 @@ def parse_vcf(file_path):
             [
                 ' '.join(word.capitalize() for word in contact.fn.value.split()),
                 clean_phone_number(contact.tel.value),
-                contact.org.value[0] if hasattr(contact, 'org') else ''
+                getattr(contact, 'ORG', [''])[0]
             ]
             for contact in vobject.readComponents(file.read())
-            if hasattr(contact, 'fn') and hasattr(contact, 'tel')
+            if all(hasattr(contact, attr) for attr in ['fn', 'tel'])
         ]
 
 
 def read_excel_contacts(file_path):
     """Read contacts from an Excel file."""
     df = pd.read_excel(file_path).fillna('')
-    return [[val.Name, str(val.Phone), val.Relation] for _, val in df.iterrows()]
-
-
-def remove_old_contacts(saved_lst, xl_lst):
-    """Remove old contacts from saved list."""
-    return [contact for contact in saved_lst if contact not in xl_lst]
-
-
-def find_and_append_contacts(saved_lst, xl_lst):
-    """Find and append contacts based on name or phone number."""
-    contacts = []
-    saved_names = {contact[0] for contact in saved_lst}
-    saved_phones = {contact[1] for contact in saved_lst}
-
-    for row in xl_lst:
-        if row[0] in saved_names:
-            contact = next((contact for contact in saved_lst if contact[0] == row[0]), None)
-        elif row[1] in saved_phones:
-            contact = next((contact for contact in saved_lst if contact[1] == row[1]), None)
-        else:
-            contact = None
-
-        if contact:
-            contacts.append(contact)
-            saved_lst.remove(contact)
-        else:
-            contacts.append(row)
-
-    contacts.extend(saved_lst)  # Append remaining saved contacts
-    return contacts
-
-
-def separate_contacts(contacts):
-    """Separate contacts into international and US based on phone number length."""
-    int_contacts = [contact for contact in contacts if len(contact[1]) != 10]
-    us_contacts = [contact for contact in contacts if len(contact[1]) == 10]
-    return sorted(int_contacts) + sorted(us_contacts)
-
-
-def print_contacts(contacts):
-    """Print contacts in a tabulated format."""
-    print('Name\tPhone\tRelation')
-    for row in contacts:
-        print('\t'.join(row))
+    return df[['Name', 'Phone', 'Relation']].values.tolist()
 
 
 def main():
@@ -80,16 +37,42 @@ def main():
     xl_lst = read_excel_contacts(XL_CONS)
 
     # Remove old contacts from the saved list
-    saved_lst = remove_old_contacts(saved_lst, xl_lst)
+    saved_lst = [contact for contact in saved_lst if contact not in xl_lst]
 
     if not saved_lst:
         print('No new contacts to add.')
         return
 
-    contacts = find_and_append_contacts(saved_lst, xl_lst)
-    contacts = separate_contacts(contacts)
+    contacts = []
 
-    print_contacts(contacts)
+    # Map saved contacts by name
+    saved_dict = {contact[0]: contact for contact in saved_lst}
+
+    # Map saved contacts by phone
+    saved_phones = {contact[1]: contact for contact in saved_lst}
+
+    for _ in xl_lst:
+
+        # Convert phone number to string
+        row = [str(cell) for cell in _]
+
+        if row[0] in saved_dict:
+            contacts.append(saved_dict.pop(row[0]))
+        elif row[1] in saved_phones:
+            contacts.append(saved_phones.pop(row[1]))
+        else:
+            contacts.append(row)
+
+    # Add remaining saved contacts
+    contacts.extend(saved_dict.values())
+
+    # Separate and sort contacts
+    contacts = sorted(contacts, key=lambda c: (len(c[1]) == 10, c[0]))
+
+    # Print contacts
+    print('Name\tPhone\tRelation')
+    for row in contacts:
+        print('\t'.join(row))
 
 
 if __name__ == '__main__':
