@@ -1,14 +1,19 @@
 import pandas as pd
 import vobject
 
-saved_cons = 'contacts.vcf'
-xl_cons = 'Contacts.xlsx'
+# File paths for the VCF and Excel contacts
+SAVED_CONS = 'contacts.vcf'
+XL_CONS = 'Contacts.xlsx'
+
 
 def clean_phone_number(phone):
+    """Clean and format the phone number."""
     phone = phone.replace(' ', '').replace(')', '').replace('(', '').replace('+', '').replace('-', '')
     return phone[1:] if phone.startswith('1') and len(phone) == 11 else phone
 
+
 def parse_vcf(file_path):
+    """Parse VCF file and return a list of contacts."""
     with open(file_path, 'r') as file:
         return [
             [
@@ -20,49 +25,72 @@ def parse_vcf(file_path):
             if hasattr(contact, 'fn') and hasattr(contact, 'tel')
         ]
 
+
 def read_excel_contacts(file_path):
+    """Read contacts from an Excel file."""
     df = pd.read_excel(file_path).fillna('')
     return [[val.Name, str(val.Phone), val.Relation] for _, val in df.iterrows()]
 
-saved_lst = parse_vcf(saved_cons)
-xl_lst = read_excel_contacts(xl_cons)
 
-# Remove old contacts from saved list
-saved_lst = [contact for contact in saved_lst if contact not in xl_lst]
+def remove_old_contacts(saved_lst, xl_lst):
+    """Remove old contacts from saved list."""
+    return [contact for contact in saved_lst if contact not in xl_lst]
 
-if not saved_lst:
-    print('No new contacts to add.')
-    exit()
 
-contacts = []
+def find_and_append_contacts(saved_lst, xl_lst):
+    """Find and append contacts based on name or phone number."""
+    contacts = []
+    saved_names = {contact[0] for contact in saved_lst}
+    saved_phones = {contact[1] for contact in saved_lst}
 
-saved_names = {contact[0] for contact in saved_lst}
-saved_phones = {contact[1] for contact in saved_lst}
+    for row in xl_lst:
+        if row[0] in saved_names:
+            contact = next((contact for contact in saved_lst if contact[0] == row[0]), None)
+        elif row[1] in saved_phones:
+            contact = next((contact for contact in saved_lst if contact[1] == row[1]), None)
+        else:
+            contact = None
 
-# Append contacts based on name or phone number
-for row in xl_lst:
-    if row[0] in saved_names:
-        contact = next((contact for contact in saved_lst if contact[0] == row[0]), None)
         if contact:
             contacts.append(contact)
             saved_lst.remove(contact)
-    elif row[1] in saved_phones:
-        contact = next((contact for contact in saved_lst if contact[1] == row[1]), None)
-        if contact:
-            contacts.append(contact)
-            saved_lst.remove(contact)
-    else:
-        contacts.append(row)
+        else:
+            contacts.append(row)
 
-contacts.extend(saved_lst)
+    contacts.extend(saved_lst)  # Append remaining saved contacts
+    return contacts
 
-# Separate international and US contacts
-int_contacts = [contact for contact in contacts if len(contact[1]) != 10]
-us_contacts = [contact for contact in contacts if len(contact[1]) == 10]
 
-contacts = sorted(int_contacts) + sorted(us_contacts)
+def separate_contacts(contacts):
+    """Separate contacts into international and US based on phone number length."""
+    int_contacts = [contact for contact in contacts if len(contact[1]) != 10]
+    us_contacts = [contact for contact in contacts if len(contact[1]) == 10]
+    return sorted(int_contacts) + sorted(us_contacts)
 
-# Print column headers
-print('Name\tPhone\tRelation')
-for row in contacts:
-    print('\t'.join(row))
+
+def print_contacts(contacts):
+    """Print contacts in a tabulated format."""
+    print('Name\tPhone\tRelation')
+    for row in contacts:
+        print('\t'.join(row))
+
+
+def main():
+    saved_lst = parse_vcf(SAVED_CONS)
+    xl_lst = read_excel_contacts(XL_CONS)
+
+    # Remove old contacts from the saved list
+    saved_lst = remove_old_contacts(saved_lst, xl_lst)
+
+    if not saved_lst:
+        print('No new contacts to add.')
+        return
+
+    contacts = find_and_append_contacts(saved_lst, xl_lst)
+    contacts = separate_contacts(contacts)
+
+    print_contacts(contacts)
+
+
+if __name__ == '__main__':
+    main()
