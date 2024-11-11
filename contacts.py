@@ -67,6 +67,9 @@ def main():
     # Add remaining saved contacts
     contacts.extend(saved_names.values())
 
+    # Remove duplicates
+    contacts = list(set(tuple(contact) for contact in contacts))
+
     # Separate and sort contacts
     contacts = sorted(contacts, key=lambda c: (len(c[1]) == 10, c[0]))
 
