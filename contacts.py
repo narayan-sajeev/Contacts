@@ -53,10 +53,15 @@ def main():
         # Convert phone number to string
         row = [str(cell) for cell in _]
 
+        # Check if contact name is in saved names
         if row[0] in saved_names:
+            # Add saved contact
             contacts.append(saved_names.pop(row[0]))
+        # Check if phone number is in saved phones
         elif row[1] in saved_phones:
+            # Add saved contact
             contacts.append(saved_phones.pop(row[1]))
+        # Add new contact
         else:
             contacts.append(row)
 
